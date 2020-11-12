@@ -206,8 +206,8 @@ public class ViewsCart extends Fragment{
                             int jumlah           = Integer.parseInt(jsonObjects.optString("jumlah"));
                             String gambar        = jsonObjects.optString("gambar");
 
-                            listDTBuku.add(
-                                    new DTBuku(idBuku, noTransaksis, jumlah, namaBuku, harga, gambar));
+                            listDTBuku.add(new DTBuku(idBuku, noTransaksis, jumlah, namaBuku, harga, gambar));
+
                         }
 
                         transaksiBukuList.add(

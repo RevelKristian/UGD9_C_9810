@@ -316,11 +316,11 @@ public class TambahEditBuku extends Fragment {
                 progressDialog.dismiss();
                 try {
                     JSONObject obj = new JSONObject(response);
-                    if (obj.getString("status").equals("Success")) {
-                        loadFragment(new ViewsBuku());
-                    }
 
+                    //obj.getString("message") digunakan untuk mengambil pesan message dari response
                     Toast.makeText(getContext(), obj.getString("message"), Toast.LENGTH_SHORT).show();
+
+                    loadFragment(new ViewsBuku());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
