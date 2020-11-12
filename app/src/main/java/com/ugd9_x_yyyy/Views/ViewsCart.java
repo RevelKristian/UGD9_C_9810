@@ -1,5 +1,6 @@
 package com.ugd9_x_yyyy.Views;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,9 +25,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.ugd9_x_yyyy.API.MahasiswaAPI;
 import com.ugd9_x_yyyy.API.TransaksiBukuAPI;
 import com.ugd9_x_yyyy.Adapters.AdapterTransaksiBuku;
+import com.ugd9_x_yyyy.Models.Buku;
 import com.ugd9_x_yyyy.Models.DTBuku;
+import com.ugd9_x_yyyy.Models.Mahasiswa;
 import com.ugd9_x_yyyy.Models.TransaksiBuku;
 import com.ugd9_x_yyyy.R;
 
@@ -50,6 +54,7 @@ public class ViewsCart extends Fragment{
     private CardView panelBayar, panelCheckBox;
     private AdapterTransaksiBuku adapter;
     private List<TransaksiBuku> transaksiBukuList;
+    private List<DTBuku> dtBuku;
     private View view;
     public Boolean isFullChecked;
 
@@ -166,69 +171,60 @@ public class ViewsCart extends Fragment{
     }
 
     public void getTransaksi() {
-        final RequestQueue queue = Volley.newRequestQueue(view.getContext());
+        RequestQueue queue = Volley.newRequestQueue(view.getContext());
+        //Meminta tanggapan string dari URL yang telah disediakan menggunakan method GET
+        //untuk request ini tidak memerlukan parameter
+        final ProgressDialog progressDialog;
+        progressDialog = new ProgressDialog(view.getContext());
+        progressDialog.setMessage("loading....");
+        progressDialog.setTitle("Menampilkan data mahasiswa");
+        progressDialog.setProgressStyle(android.app.ProgressDialog.STYLE_SPINNER);
+        progressDialog.show();
 
         final JsonObjectRequest stringRequest = new JsonObjectRequest(GET, TransaksiBukuAPI.URL_SELECT
                 , null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                //Disini bagian jika response jaringan berhasil tidak terdapat ganguan/error
+                progressDialog.dismiss();
                 try {
-                    JSONArray jsonArray = response.getJSONArray("transaksibuku");
+                    //Mengambil data response json object yang berupa data mahasiswa
+                    JSONArray jsonArray = response.getJSONArray("transaksiBuku");
 
-                    if(!transaksiBukuList.isEmpty())
-                        transaksiBukuList.clear();
+                    if (!transaksiBukuList.isEmpty()) transaksiBukuList.clear();
 
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 
-                        String noTransaksi  = jsonObject.optString("noTransaksi");
-                        int idToko          = Integer.parseInt(jsonObject.optString("idToko"));
-                        String tglTransaksi = jsonObject.optString("tglTransaksi");
-                        Double totalBiaya   = Double.parseDouble(jsonObject.optString("totalBiaya"));
-                        String namaToko      = jsonObject.optString("namaToko");
+                        String noTransaksi       = jsonObject.optString("noTransaksi");
+                        int idToko               = jsonObject.optInt("idToko");
+                        String tglTransaksi      = jsonObject.optString("tglTransaksi");
+                        Double totalBiaya        = jsonObject.optDouble("totalBiaya");
+                        String namaToko          = jsonObject.optString("namaToko");
+                       // List<DTBuku> dtBukus     = jsonObject.optString().
 
-                        JSONArray jsonArrays = jsonObject.optJSONArray("dtbuku");
+                        TransaksiBuku transaksiBuku = new TransaksiBuku(noTransaksi, idToko, tglTransaksi, totalBiaya, namaToko,dtBuku);
 
-                        List<DTBuku> listDTBuku = new ArrayList<>();
-
-                        for (int j = 0; j < jsonArrays.length(); j++) {
-                            JSONObject jsonObjects = (JSONObject) jsonArrays.get(j);
-
-                            String noTransaksis  = jsonObjects.optString("noTransaksi");
-                            int idBuku           = Integer.parseInt(jsonObjects.optString("idBuku"));
-                            String namaBuku      = jsonObjects.optString("namaBuku");
-                            Double harga         = Double.parseDouble(jsonObjects.optString("harga"));
-                            int jumlah           = Integer.parseInt(jsonObjects.optString("jumlah"));
-                            String gambar        = jsonObjects.optString("gambar");
-
-                            listDTBuku.add(
-                                    new DTBuku(idBuku, noTransaksis, jumlah, namaBuku, harga, gambar));
-                        }
-
-                        transaksiBukuList.add(
-                                new TransaksiBuku(noTransaksi, idToko, tglTransaksi, totalBiaya, namaToko, listDTBuku));
+                        transaksiBukuList.add(transaksiBuku);
                     }
                     adapter.notifyDataSetChanged();
                 }catch (JSONException e){
                     e.printStackTrace();
                 }
-
                 Toast.makeText(view.getContext(), response.optString("message"),
                         Toast.LENGTH_SHORT).show();
-
-                if(transaksiBukuList.isEmpty())
-                    panelCheckBox.setVisibility(View.GONE);
-                else
-                    panelCheckBox.setVisibility(View.VISIBLE);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                //Disini bagian jika response jaringan terdapat ganguan/error
+                progressDialog.dismiss();
                 Toast.makeText(view.getContext(), error.getMessage(),
                         Toast.LENGTH_SHORT).show();
             }
         });
 
+        //Disini proses penambahan request yang sudah kita buat ke reuest queue yang sudah dideklarasi
         queue.add(stringRequest);
     }
 }

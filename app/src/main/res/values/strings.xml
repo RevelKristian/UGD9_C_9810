@@ -1,9 +1,9 @@
 <resources>
     //Jangan lupa diganti disini
-    <string name="app_name">UGD9_X_YYYY</string>
-    <string name="nama">Wahyu Candra Buana</string>
-    <string name="npm">170709246</string>
-    <string name="kelas">B</string>
+    <string name="app_name">UGD9_C_9810</string>
+    <string name="nama">Revel Kristian Sutanto</string>
+    <string name="npm">180709810</string>
+    <string name="kelas">C</string>
 
 
     <string-array name="jenisKelamin">
